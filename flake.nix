@@ -76,41 +76,50 @@
         }:
         let
           cfg = config.services.waul;
-          waulPkg = self.packages.${pkgs.system}.default;
+          waulPkg = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
           confFile = pkgs.writeText "waul-config.ini" ''
-            margin = ${cfg.margin}
-            border_width = ${cfg.border-width}
-            border_radius = ${cfg.border-radius}
-            border_color = ${cfg.border-color}
-            background_color = ${cfg.background-color}
+            margin = ${cfg.settings.margin}
+            border_width = ${cfg.settings.border-width}
+            border_radius = ${cfg.settings.border-radius}
+            border_color = ${cfg.settings.border-color}
+            background_color = ${cfg.settings.background-color}
           '';
         in
         {
           options.services.waul = {
             enable = lib.mkEnableOption "waul daemon";
-            margin = lib.mkOption {
-              type = lib.types.str;
-              default = "0 0 0 0";
+            package = lib.mkOption {
+              type = lib.types.package;
+              default = waulPkg;
+              description = "waul package to run.";
             };
-            border-width = lib.mkOption {
-              type = lib.types.str;
-              default = "0 0 0 0";
-            };
-            border-radius = lib.mkOption {
-              type = lib.types.str;
-              default = "0 0 0 0";
-            };
-            border-color = lib.mkOption {
-              type = lib.types.str;
-              default = "255 255 255 255";
-            };
-            background-color = lib.mkOption {
-              type = lib.types.str;
-              default = "0 0 0 255";
+            settings = {
+              margin = lib.mkOption {
+                type = lib.types.str;
+                default = "0 0 0 0";
+              };
+              border-width = lib.mkOption {
+                type = lib.types.str;
+                default = "0 0 0 0";
+              };
+              border-radius = lib.mkOption {
+                type = lib.types.str;
+                default = "0 0 0 0";
+              };
+              border-color = lib.mkOption {
+                type = lib.types.str;
+                default = "255 255 255 255";
+              };
+              background-color = lib.mkOption {
+                type = lib.types.str;
+                default = "0 0 0 255";
+              };
             };
           };
 
           config = lib.mkIf cfg.enable {
+            home.packages = [ waulPkg ];
+
             xdg.configFile."waul/config.ini".source = confFile;
 
             systemd.user.services.waul = {
@@ -120,6 +129,7 @@
                 PartOf = [ "graphical-session.target" ];
               };
               Service = {
+                Type = "forking";
                 ExecStart = "${waulPkg}/bin/waul";
                 Restart = "on-failure";
               };
