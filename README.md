@@ -65,6 +65,15 @@ services.waul = {
 
 ```
 
+### Building
+
+```nix
+# To build use the flake
+nix build .
+# or for development env
+nix develop
+```
+
 ### Building on other distro
 
 #### 1. Dependencies

@@ -17,11 +17,54 @@
     in
     {
       packages = forAllSystems (system: {
-        default = (pkgsFor system).callPackage ./default.nix { };
+        default =
+          let
+            pkgs = pkgsFor system;
+          in
+          pkgs.stdenv.mkDerivation {
+            pname = "waul";
+            version = "0.1.0";
+            src = ./.;
+
+            nativeBuildInputs = with pkgs; [
+              cmake
+              pkg-config
+              wayland-scanner
+            ];
+            buildInputs = with pkgs; [
+              wayland
+              wayland-protocols
+              wlr-protocols
+              stb
+            ];
+
+            cmakeFlags = [ "-DCMAKE_BUILD_TYPE=Release" ];
+
+            installPhase = ''
+              mkdir -p $out/bin
+              install -Dm755 waul $out/bin/waul
+            '';
+          };
       });
 
       devShells = forAllSystems (system: {
-        default = import ./shell.nix { pkgs = pkgsFor system; };
+        default =
+          let
+            pkgs = pkgsFor system;
+          in
+          pkgs.mkShell {
+            nativeBuildInputs = with pkgs; [
+              cmake
+              pkg-config
+              wayland-scanner
+            ];
+            buildInputs = with pkgs; [
+              wayland
+              wayland-protocols
+              wlr-protocols
+              stb
+            ];
+          };
       });
 
       moduleLogic =
