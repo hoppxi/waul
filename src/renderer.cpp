@@ -154,13 +154,52 @@ void Renderer::draw(const std::string& path, wl_surface* surf) {
                 }
 
                 if (rad > 0) {
-                    if (dist > rad) {
-                         final_pixel = bg_color; // Outside circle
-                    } else if (dist > rad - 1.0f) {
-                         float factor = dist - (rad - 1.0f); // 0.0 (inner) to 1.0 (outer)
-                         final_pixel = blend(content_pixel, bg_color, factor);
-                    } else {
-                         final_pixel = content_pixel; // Inside
+                    // Pick border width for this corner
+                    int bw = 0;
+                    if (rx < cfg.br[0] && ry < cfg.br[0])               bw = std::max(cfg.bw[0], cfg.bw[1]); // TL
+                    else if (rx >= cw - cfg.br[1] && ry < cfg.br[1])   bw = std::max(cfg.bw[0], cfg.bw[3]); // TR
+                    else if (rx >= cw - cfg.br[2] && ry >= ch - cfg.br[2]) bw = std::max(cfg.bw[2], cfg.bw[3]); // BR
+                    else if (rx < cfg.br[3] && ry >= ch - cfg.br[3])   bw = std::max(cfg.bw[2], cfg.bw[1]); // BL
+
+                    int outer_rad = rad;
+                    int inner_rad = std::max(0, outer_rad - bw);
+                    float dx = 0.0f, dy = 0.0f;
+
+                    if (rx < rad && ry < rad) { // TL
+                        dx = std::max(0.0f, float(rad - rx - 0.5f));
+                        dy = std::max(0.0f, float(rad - ry - 0.5f));
+                    }
+                    else if (rx >= cw - rad && ry < rad) { // TR
+                        dx = std::max(0.0f, float(rx - (cw - rad) + 0.5f));
+                        dy = std::max(0.0f, float(rad - ry - 0.5f));
+                    }
+                    else if (rx >= cw - rad && ry >= ch - rad) { // BR
+                        dx = std::max(0.0f, float(rx - (cw - rad) + 0.5f));
+                        dy = std::max(0.0f, float(ry - (ch - rad) + 0.5f));
+                    }
+                    else if (rx < rad && ry >= ch - rad) { // BL
+                        dx = std::max(0.0f, float(rad - rx - 0.5f));
+                        dy = std::max(0.0f, float(ry - (ch - rad) + 0.5f));
+                    }
+
+                    float dist = sqrt(dx * dx + dy * dy) - 0.5f;
+
+                    if (dist > outer_rad) {
+                        final_pixel = bg_color;
+                    } 
+                    else if (dist > outer_rad - 1.0f) {
+                        float t = dist - (outer_rad - 1.0f);
+                        final_pixel = blend(border_color, bg_color, t);
+                    }
+                    else if (dist > inner_rad) {
+                        final_pixel = border_color;
+                    }
+                    else if (dist > inner_rad - 1.0f) {
+                        float t = dist - (inner_rad - 1.0f);
+                        final_pixel = blend(content_pixel, border_color, t);
+                    }
+                    else {
+                        final_pixel = content_pixel;
                     }
                 } else {
                     final_pixel = content_pixel;
