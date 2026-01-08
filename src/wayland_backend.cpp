@@ -12,9 +12,12 @@
 
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <poll.h>
+#include <string>
 #include <unistd.h>
 
+namespace fs = std::filesystem;
 namespace waul {
 
 bool Wayland::running = false;
@@ -113,12 +116,30 @@ void Wayland::stop() { running = false; }
 
 void Wayland::set_wallpaper(const std::string &path) {
   current_wall = path;
+  std::string cache_dir = get_cache_dir();
   // Save to cache
-  std::string cache_file = get_cache_dir() + "/last_wall";
+  std::string cache_file = cache_dir + "/last_wall";
   FILE *f = fopen(cache_file.c_str(), "w");
   if (f) {
     fputs(path.c_str(), f);
     fclose(f);
+  }
+
+  // support for wallpaper sync from a wallpaper path
+  fs::path source_path(path);
+
+  if (fs::exists(source_path)) {
+    std::string ext = source_path.extension().string();
+    fs::path target_path = fs::path(cache_dir) / ("current_wall" + ext);
+    for (const auto &entry : fs::directory_iterator(cache_dir)) {
+      if (entry.is_regular_file() && entry.path().stem() == "current_wall") {
+        fs::remove(entry.path());
+      }
+    }
+    fs::copy_file(source_path, target_path,
+                  fs::copy_options::overwrite_existing);
+  } else {
+    log_msg(ERROR, "Wallpaper does not exist: %s", path.c_str());
   }
 
   Renderer::draw(current_wall, surface);
