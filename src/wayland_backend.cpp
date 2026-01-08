@@ -129,8 +129,8 @@ void Wayland::set_wallpaper(const std::string &path) {
   fs::path source_path(path);
 
   if (fs::exists(source_path)) {
-    std::string ext = source_path.extension().string();
-    fs::path target_path = fs::path(cache_dir) / ("current_wall" + ext);
+    // let other apps detect the image format from file headers
+    fs::path target_path = fs::path(cache_dir) / ("current_wall");
     for (const auto &entry : fs::directory_iterator(cache_dir)) {
       if (entry.is_regular_file() && entry.path().stem() == "current_wall") {
         fs::remove(entry.path());
