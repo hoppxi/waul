@@ -23,7 +23,7 @@
           in
           pkgs.stdenv.mkDerivation {
             pname = "waul";
-            version = "0.1.0";
+            version = "0.2.0";
             src = ./.;
 
             nativeBuildInputs = with pkgs; [
@@ -78,6 +78,7 @@
           cfg = config.services.waul;
           waulPkg = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
           confFile = pkgs.writeText "waul-config.ini" ''
+            [settings]
             margin = ${cfg.settings.margin}
             border_width = ${cfg.settings.border-width}
             border_radius = ${cfg.settings.border-radius}
@@ -129,8 +130,8 @@
                 PartOf = [ "graphical-session.target" ];
               };
               Service = {
-                Type = "forking";
-                ExecStart = "${waulPkg}/bin/waul";
+                Type = "simple";
+                ExecStart = "${waulPkg}/bin/waul --no-daemon";
                 Restart = "on-failure";
               };
               Install.WantedBy = [ "graphical-session.target" ];

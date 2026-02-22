@@ -49,7 +49,8 @@ set(SOURCES
 add_executable(waul ${SOURCES})
 
 # Apply C++ specific flags ONLY to the target
-target_compile_options(waul PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Os -fno-exceptions -fno-rtti -Wall -Wextra>)
-target_compile_options(waul PRIVATE $<$<COMPILE_LANGUAGE:C>:-Os -Wall -Wextra>)
+target_compile_options(waul PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Os -flto -fno-exceptions -fno-rtti -Wall -Wextra>)
+target_compile_options(waul PRIVATE $<$<COMPILE_LANGUAGE:C>:-Os -flto -Wall -Wextra>)
+target_link_options(waul PRIVATE -flto)
 
 target_link_libraries(waul ${WAYLAND_CLIENT_LIBRARIES} pthread)

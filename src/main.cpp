@@ -22,11 +22,12 @@ void print_help(bool is_error = false) {
       << "  --reload        Restart daemon\n"
       << "  --quit          Stop daemon\n"
       << "  --ping          Check if daemon is running\n"
+      << "  --no-daemon     Run in foreground instead of forking\n"
       << "  --version       Print version\n"
       << "  --help          Show this help message\n";
 }
 
-void print_version() { std::cout << "waul v0.1.0\n"; }
+void print_version() { std::cout << "waul v0.2.0\n"; }
 
 int main(int argc, char **argv) {
   log_init();
@@ -51,7 +52,7 @@ int main(int argc, char **argv) {
         std::cout << "Daemon not running, starting...\n";
         if (fork() == 0) {
           setsid();
-          std::string cache = get_cache_dir() + "/last_wall";
+          std::string cache = get_cache_dir() + "/current_wall_path";
           ensure_dir(get_cache_dir());
           FILE *f = fopen(cache.c_str(), "w");
           if (f) {
@@ -81,6 +82,8 @@ int main(int argc, char **argv) {
         return 1;
       }
       return 0;
+    } else if (action == "--no-daemon") {
+      goto run_daemon;
     } else {
       print_help(true);
       return 1;

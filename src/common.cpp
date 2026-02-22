@@ -35,10 +35,10 @@ std::string get_cache_dir() {
   return path;
 }
 
-std::string get_data_home_dir() {
-  const char *dt = getenv("XGD_DATA_HOME");
-  std::string path = dt ? std::string(dt) + "/waul"
-                        : std::string(getenv("HOME")) + "/.local/share/waul";
+std::string get_state_dir() {
+  const char *st = getenv("XDG_STATE_HOME");
+  std::string path = st ? std::string(st) + "/waul"
+                        : std::string(getenv("HOME")) + "/.local/state/waul";
   ensure_dir(path);
   return path;
 }
@@ -55,7 +55,7 @@ std::string get_runtime_dir() {
 std::string get_socket_path() { return get_runtime_dir() + "/waul.sock"; }
 
 void log_init() {
-  std::string path = get_data_home_dir() + "/waul.log";
+  std::string path = get_state_dir() + "/waul.log";
   log_file = fopen(path.c_str(), "a");
 }
 

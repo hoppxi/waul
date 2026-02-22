@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include "ipc.hpp"
 #include "renderer.hpp"
+#include <stb/stb_image.h>
 
 #include <wayland-client.h>
 
@@ -98,7 +99,7 @@ int Wayland::init() {
   wl_display_flush(display);
 
   // Load last wallpaper
-  std::string cache_file = get_cache_dir() + "/last_wall";
+  std::string cache_file = get_cache_dir() + "/current_wall_path";
   FILE *f = fopen(cache_file.c_str(), "r");
   if (f) {
     char buf[1024];
@@ -115,10 +116,16 @@ int Wayland::init() {
 void Wayland::stop() { running = false; }
 
 void Wayland::set_wallpaper(const std::string &path) {
+  int iw, ih, ic;
+  if (!stbi_info(path.c_str(), &iw, &ih, &ic)) {
+    log_msg(ERROR, "Failed to read image info for: %s", path.c_str());
+    return;
+  }
+
   current_wall = path;
   std::string cache_dir = get_cache_dir();
   // Save to cache
-  std::string cache_file = cache_dir + "/last_wall";
+  std::string cache_file = cache_dir + "/current_wall_path";
   FILE *f = fopen(cache_file.c_str(), "w");
   if (f) {
     fputs(path.c_str(), f);

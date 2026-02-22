@@ -16,6 +16,7 @@ The goal of `waul` is to stay under 2MB of RAM, and to provid the exact styling 
 uses `~/.config/waul/config.ini`:
 
 ```ini
+[settings]
 # Margins: Top Left Bottom Right
 margin = 30 0 0 0
 # lets you to set 30px margin from the top letting your bar backgroud black

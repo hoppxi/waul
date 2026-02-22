@@ -128,25 +128,16 @@ void Renderer::draw(const std::string &path, wl_surface *surf) {
       if (!is_margin) {
         int rx = x - cx, ry = y - cy;
         int rad = 0;
-        float dist = 0;
 
         // Corner Check
         if (rx < cfg.br[0] && ry < cfg.br[0]) {
           rad = cfg.br[0];
-          dist = sqrt(pow(cfg.br[0] - rx - 0.5f, 2) +
-                      pow(cfg.br[0] - ry - 0.5f, 2));
         } else if (rx >= cw - cfg.br[1] && ry < cfg.br[1]) {
           rad = cfg.br[1];
-          dist = sqrt(pow(rx - (cw - cfg.br[1]) + 0.5f, 2) +
-                      pow(cfg.br[1] - ry - 0.5f, 2));
         } else if (rx >= cw - cfg.br[2] && ry >= ch - cfg.br[2]) {
           rad = cfg.br[2];
-          dist = sqrt(pow(rx - (cw - cfg.br[2]) + 0.5f, 2) +
-                      pow(ry - (ch - cfg.br[2]) + 0.5f, 2));
         } else if (rx < cfg.br[3] && ry >= ch - cfg.br[3]) {
           rad = cfg.br[3];
-          dist = sqrt(pow(cfg.br[3] - rx - 0.5f, 2) +
-                      pow(ry - (ch - cfg.br[3]) + 0.5f, 2));
         }
 
         uint32_t content_pixel = bg_color;

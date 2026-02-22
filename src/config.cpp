@@ -13,6 +13,13 @@ ConfigState &Config::get() { return state; }
 std::string Config::get_path() { return get_config_dir() + "/config.ini"; }
 
 static void parse_ints(char *str, int *out, int max) {
+  // Strip inline comments
+  char *comment = strchr(str, '#');
+  if (!comment)
+    comment = strchr(str, ';');
+  if (comment)
+    *comment = '\0';
+
   int count = 0;
   char *token = strtok(str, " \t\n");
   while (token && count < max) {
@@ -40,6 +47,10 @@ void Config::load() {
     while (*start == ' ' || *start == '\t')
       start++;
     if (*start == '#' || *start == ';' || *start == '\n' || *start == 0)
+      continue;
+
+    // Ignore sections
+    if (*start == '[')
       continue;
 
     char *eq = strchr(start, '=');
